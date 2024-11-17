@@ -289,7 +289,7 @@ function Get-SystemReport {
 }
 
 # Exemple d'appel de la fonction pour générer un rapport en français
-Get-SystemReport 
+# Get-SystemReport 
 
 # Exemple d'appel de la fonction pour générer un rapport en anglais
 # Get-SystemReport -Language "en"
