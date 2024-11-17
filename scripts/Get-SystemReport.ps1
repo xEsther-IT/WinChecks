@@ -314,7 +314,7 @@ function Get-SystemReport {
 # Get-SystemReport 
 
 # Exemple d'appel de la fonction pour générer un rapport en anglais
-Get-SystemReport -Language "en"
+# Get-SystemReport -Language "en"
 
 # Exemple d'appel de la fonction pour générer un rapport en espagnol
 # Get-SystemReport -Language "es"
