@@ -1,14 +1,14 @@
 <#
 .SYNOPSIS
-	Générer un rapport avec les informations de base du système d'exploitation Windows 
+    Générer un rapport avec les informations de base du système d'exploitation Windows 
 .DESCRIPTION
-	Ce script PowerShell recherche les détails du matériel de l'ordinateur local et génère un rapport en français, anglais ou espagnol contenant ces informations.
-    ✅ Informations sur le système d'exploitation
-    ✅ Informations sur le processeur
-    ✅ Informations sur la mémoire RAM
-    ✅ Informations sur les adaptateurs réseau
-    ✅ Liste des utilisateurs locaux
-    ✅ Logiciels installés 
+    Ce script PowerShell recherche les détails du matériel de l'ordinateur local et génère un rapport en français, anglais ou espagnol contenant ces informations.
+    	✅ Informations sur le système d'exploitation
+    	✅ Informations sur le processeur
+   	✅ Informations sur la mémoire RAM
+    	✅ Informations sur les adaptateurs réseau
+    	✅ Liste des utilisateurs locaux
+    	✅ Logiciels installés 
 
 .PARAMETER -Language
     Spécifie la langue du rapport. Par défaut, le rapport sera en français. 
@@ -20,19 +20,17 @@
 
 .EXAMPLE
     # Pour générer un rapport en français
-	PS> ./Generate-SystemReport.ps1
-    
+    	PS> ./Generate-SystemReport.ps1
     # Pour générer un rapport en anglais
-    PS> ./Generate-SystemReport -Language "en"
-
+    	PS> ./Generate-SystemReport -Language "en"
     # Pour générer un rapport en espagnol
-    PS> ./Generate-SystemReport -Language "es"
+    	PS> ./Generate-SystemReport -Language "es"
 	
 .LINK
-	https://github.com/xEsther-IT/WinChecks
+    https://github.com/xEsther-IT/WinChecks
 
 .NOTES
-	Author: 2024 @xesther.meza | License: MIT
+    Author: 2024 @xesther.meza | License: MIT
 #>
 
 function Get-SystemReport {
