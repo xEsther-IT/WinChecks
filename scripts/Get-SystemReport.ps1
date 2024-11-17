@@ -285,7 +285,7 @@ function Get-SystemReport {
     # Afficher l'emplacement du rapport
     Write-Host "Le rapport a été généré et sauvegardé à l'emplacement suivant : $outputFile"
     
-# Fin de la fonction get-SystemReport
+# Fin de la fonction Get-SystemReport
 }
 
 # Exemple d'appel de la fonction pour générer un rapport en français
