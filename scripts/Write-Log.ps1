@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-	Ecrire des messages de log dans un fichier spécifié 
+	Écrire des messages de log dans un fichier spécifié. 
 .DESCRIPTION
 	Cet script permet d'écrire des messages de log dans un fichier spécifié tout en affichant les messages dans la console avec une coloration appropriée en fonction du type de message 
      ℹ️  Info
@@ -37,6 +37,7 @@
 
 .NOTES
 	Author: 2024 @xesther.meza | License: MIT
+
 #>
 Function Write-Log {
     Param (
@@ -109,20 +110,11 @@ Function Write-Log {
     }
 }
 
-# # Exemple d'utilisation de la fonction Write-Log
+# Exemple d'utilisation de la fonction Write-Log
 # $LogPath = "C:\Temp\xLuna"  # Répertoire où le fichier de log sera stocké
 # $LogName= 'test.log'      # Nom du fichier de log
 # $Type = 'Success'         # Type de message (Success)
-# $Message = ''
+# $Message = 'Ma fonction pour écrire des logs'
 
-# for($item = 1; $item -le 10; $item ++){
-#     $Message += "`n"
-#     $Message += "Rapport d'information systeme" + "`n"
-#     $Message += "Genere le : " + (Get-Date) + "`n"
-#     $Message += "------------------------------------------------------------" + "`n"
-#     $Message += "`n"
-
-# }
 # # Appel de la fonction Write-Log
 # Write-Log -LogPath $LogPath -LogName $LogName -Type $Type -Message $Message
-
