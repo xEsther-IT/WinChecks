@@ -8,7 +8,7 @@
     ✅ Informations sur la mémoire RAM
     ✅ Informations sur les adaptateurs réseau
     ✅ Liste des utilisateurs locaux
-    ✅ Logiciels installés 
+    ✅ Logiciels installés
 
 .PARAMETER -Language
     Spécifie la langue du rapport. Par défaut, le rapport sera en français. 
@@ -32,163 +32,120 @@
 	https://github.com/xEsther-IT/WinChecks
 
 .NOTES
-	Author: 2024 @xesther.meza | License: MIT
+    1.PowerShell en mode administrateur nécessaire.
+    2.Fonctionne nécessaire.
+        .\Write-Log.ps1 
+    
+    Author: 2024 @xesther.meza | License: MIT
 #>
 
 function Get-SystemReport {
     param (
-        [string]$Language = "fr"  # Par défaut, le rapport sera en français 
+        [string]$Language = "fr"  
+        # Par défaut, le rapport sera en français 
         # options "es" - Espanol, "en" - English
     )
+    
+    # Définir les entrées de la fonction Write-Log
+    $LogPath = "C:\Temp\xLuna"      # Répertoire où le fichier de log sera stocké
+    $LogName= 'SystemReport.txt'    # Nom du fichier
+    $Type = 'Info'                  # Type de message (Info)
+    $Message = ''
 
-    # Définir le chemin du fichier de sortie avec la date formatée
-    $outputFile = "C:\tmp\xLuna\System_Report_" + (Get-Date -Format "yyyyMMdd") + ".txt"
-
-    # Assurez-vous que le répertoire existe
-    $outputDir = "C:\tmp\xLuna"
-    if (-not (Test-Path -Path $outputDir)) {
-        New-Item -ItemType Directory -Path $outputDir
+    # Créer le répertoire de log si nécessaire
+    if (-not (Test-Path -Path $LogPath)) {
+        New-Item -ItemType Directory -Path $LogPath
     }
 
-    # Initialiser le contenu du rapport
-    $reportContent = ""
-
-# En-tête du rapport 
+    # En-tête du rapport
     switch ($Language) {
-        "fr" {
-            $reportContent += "Rapport d'information système" + "`n"
-            $reportContent += "Généré le : " + (Get-Date) + "`n"
-            $reportContent += "------------------------------------------------------------" + "`n"
-        }
-        "es" {
-            $reportContent += "Reporte de la información del sistema" + "`n"
-            $reportContent += "Creado el : " + (Get-Date) + "`n"
-            $reportContent += "------------------------------------------------------------" + "`n"
-        }
-        "en" {
-            $reportContent += "System Information Report" + "`n"
-            $reportContent += "Generated on: " + (Get-Date) + "`n"
-            $reportContent += "------------------------------------------------------------" + "`n"
-        }
-        default {
-            Write-Host "Langue non supportée, le rapport sera en français."
-            $reportContent += "Rapport d'information système" + "`n"
-            $reportContent += "Généré le : " + (Get-Date) + "`n"
-            $reportContent += "------------------------------------------------------------" + "`n"
-        }
+        "fr" { $Message += "Rapport d'information système" + "`n" }
+        "es" { $Message += "Reporte de la información del sistema" + "`n" }
+        "en" { $Message += "System Information Report" + "`n" }
+        default { Write-Host "Langue non supportée, le rapport sera en français." }
     }
-
-# Informations sur l'ordinateur 
+    $Message += "------------------------------------------------------------`n"
+    
+    # Informations système de base
     switch ($Language) {
-        "fr" {$reportContent += "## Informations de base sur le système" + "`n"}
-        "es" {$reportContent += "## Información básica de la computadora" + "`n" }
-        "en" {$reportContent += "## Basic System Information" + "`n" }
+        "fr" {$Message += "## Informations de base sur le système" + "`n"}
+        "es" {$Message += "## Información básica de la computadora" + "`n" }
+        "en" {$Message += "## Basic System Information" + "`n" }
     }
+    $Message += Get-ComputerInfo | Select-Object CsName, OsArchitecture, WindowsVersion, Manufacturer, Model | Format-List | Out-String
+    $Message += "`n"
 
-    $reportContent += (Get-ComputerInfo | Select-Object -Property CsName, OsArchitecture, WindowsVersion, WindowsBuildLabEx, Manufacturer, Model | Format-List | Out-String)
-    $reportContent += "`n"
-
-# Informations sur le système d'exploitation
+    # Informations OS
     switch ($Language) {
-        "fr" {$reportContent += "## Informations sur le système d'exploitation" + "`n" }
-        "es" { $reportContent += "## Información sobre el sistema operativo" + "`n" }
-        "en" { $reportContent += "## Operating System Information" + "`n" }
+        "fr" {$Message += "## Informations sur le système d'exploitation" + "`n" }
+        "es" { $Message += "## Información sobre el sistema operativo" + "`n" }
+        "en" { $Message += "## Operating System Information" + "`n" }
     }
-
     $osInfo = Get-CimInstance -ClassName Win32_OperatingSystem
-    $reportContent += "OS Name: " + $osInfo.Caption + "`n"
-    $reportContent += "Version: " + $osInfo.Version + "`n"
-    $reportContent += "Build: " + $osInfo.BuildNumber + "`n"
-    $reportContent += "Last Boot Time: " + $osInfo.LastBootUpTime + "`n"
-    $reportContent += "`n"
+    $Message += "OS Name: $($osInfo.Caption)`n"
+    $Message += "Version: $($osInfo.Version)`n"
+    $Message += "Build: $($osInfo.BuildNumber)`n"
+    $Message += "`n"
 
-# Informations sur le processeur
+    # Informations sur le processeur
     switch ($Language) {
-        "fr" { $reportContent += "## Informations sur le processeur" + "`n" }
-        "es" { $reportContent += "## Información sobre el procesador" + "`n"  }
-        "en" { $reportContent += "## CPU Information" + "`n" }
+        "fr" { $Message += "## Informations sur le processeur" + "`n" }
+        "es" { $Message += "## Información sobre el procesador" + "`n"  }
+        "en" { $Message += "## CPU Information" + "`n" }
     }
-
     $cpuInfo = Get-CimInstance -ClassName Win32_Processor
-    $reportContent += "CPU Name: " + $cpuInfo.Name + "`n"
-    $reportContent += "Cores: " + $cpuInfo.NumberOfCores + "`n"
-    $reportContent += "Logical Processors: " + $cpuInfo.NumberOfLogicalProcessors + "`n"
-    $reportContent += "Clock Speed: " + $cpuInfo.MaxClockSpeed + " MHz" + "`n"
-    $reportContent += "`n"
+    $Message += "CPU Name: $($cpuInfo.Name)`n"
+    $Message += "Cores: $($cpuInfo.NumberOfCores)`n"
+    $Message += "Clock Speed: $($cpuInfo.MaxClockSpeed) MHz`n"
+    $Message += "`n"
 
-# Informations sur la mémoire RAM
+    # Informations sur la mémoire RAM
     switch ($Language) {
-        "fr" { $reportContent += "## Informations sur la mémoire RAM" + "`n" }
-        "es" { $reportContent += "## Información sobre la memoria RAM" + "`n" }
-        "en" { $reportContent += "## RAM Information" + "`n" }
+        "fr" { $Message += "## Informations sur la mémoire RAM" + "`n" }
+        "es" { $Message += "## Información sobre la memoria RAM" + "`n" }
+        "en" { $Message += "## RAM Information" + "`n" }
     }
-    # Obtenir les informations sur la RAM
     $memoryInfo = Get-CimInstance -ClassName Win32_PhysicalMemory
+    $totalMemory = ($memoryInfo | Measure-Object -Property Capacity -Sum).Sum / 1GB
+    $Message += "Total RAM memory: $([math]::round($totalMemory, 2)) Go`n"
+    $Message += "`n"
 
-    # Vérifier si des informations sur la RAM ont été récupérées
-    if ($memoryInfo) {
-        # Calculer la RAM totale en additionnant les capacités de chaque barrette
-        $totalMemory = 0
-        foreach ($memory in $memoryInfo) {
-            $totalMemory += $memory.Capacity
-        }
-
-        # Obtenir la vitesse de la RAM (en prenant la première barrette)
-        $ramSpeed = $memoryInfo[0].Speed
-
-        # Ajouter les informations de RAM au rapport
-        $reportContent += "Total RAM memory : " + [math]::round($totalMemory / 1GB, 2) + " Go" + "`n"
-        $reportContent += "RAM speed : " + $ramSpeed + " MHz" + "`n"
-        $reportContent += "`n"
-    } else {
-        # Si aucune information sur la RAM n'est trouvée
-        $reportContent += "No RAM information available." + "`n"
-        $reportContent += "`n"
-    }
-
-# Informations sur les disques
+    # Informations sur les disques
     switch ($Language) {
-        "fr" {$reportContent += "## Informations sur les disques" + "`n"}
-        "es" {$reportContent += "## Información sobre los discos" + "`n"}
-        "en" {$reportContent += "## Disk Information" + "`n"}
+        "fr" {$Message += "## Informations sur les disques" + "`n"}
+        "es" {$Message += "## Información sobre los discos" + "`n"}
+        "en" {$Message += "## Disk Information" + "`n"}
     }
-
+    $diskInfo = Get-CimInstance -ClassName Win32_DiskDrive
     if ($diskInfo) {
         $diskInfo | ForEach-Object {
             # Ajouter les informations du disque physique
-            $reportContent += "Disk Model: " + $_.Model + "`n"
-            $reportContent += "Size: " + [math]::round($_.Size / 1GB, 2) + " GB" + "`n"
-            $reportContent += "Media Type: " + $_.MediaType + "`n"
-            
+            $Message += "Disk Model: " + $_.Model + "`n"
+            $Message += "Size: " + [math]::round($_.Size / 1GB, 2) + " GB" + "`n"
+            $Message += "Media Type: " + $_.MediaType + "`n"
             # Maintenant on récupère l'espace libre et utilisé à partir des partitions logiques associées
             $partitions = Get-CimInstance -ClassName Win32_LogicalDisk | Where-Object { $_.DeviceID -eq $_.DeviceID }
             if ($partitions) {
                 $partitions | ForEach-Object {
-                    $reportContent += "Drive: " + $_.DeviceID + "`n"
-                    $reportContent += "Free Space: " + [math]::round($_.FreeSpace / 1GB, 2) + " GB" + "`n"
-                    $reportContent += "Total Space: " + [math]::round($_.Size / 1GB, 2) + " GB" + "`n"
-                    $reportContent += "File System: " + $_.FileSystem + "`n"
-                    $reportContent += "`n"
+                    $Message += "Drive: " + $_.DeviceID + "`n"
+                    $Message += "Free Space: " + [math]::round($_.FreeSpace / 1GB, 2) + " GB" + "`n"
+                    $Message += "Total Space: " + [math]::round($_.Size / 1GB, 2) + " GB" + "`n"
+                    $Message += "File System: " + $_.FileSystem + "`n"
+                    $Message += "`n"
                 }
             } else {
-                $reportContent += "No logical disk partitions found." + "`n"
+                $Message += "No logical disk partitions found." + "`n"
             }
         }
-    } else {
-        switch ($Language) {
-            "fr" { $reportContent += "Aucune information sur les disques trouvée." + "`n" }
-            "es" { $reportContent += "No se encontró información sobre los discos." + "`n" }
-            "en" { $reportContent += "No disk information found." + "`n" }
-        }
-    }
+    } else { $Message += "No disk information found." + "`n"}
+    $Message += "`n"
 
-# Informations sur les adaptateurs réseau
+    # Informations sur les adaptateurs réseau
     switch ($Language) {
-        "fr" { $reportContent += "## Informations sur les adaptateurs réseau" + "`n" }
-        "es" { $reportContent += "## Información sobre los adaptadores de red" + "`n" }
-        "en" { $reportContent += "## Network Adapter Information" + "`n" }
+        "fr" { $Message += "## Informations sur les adaptateurs réseau" + "`n" }
+        "es" { $Message += "## Información sobre los adaptadores de red" + "`n" }
+        "en" { $Message += "## Network Adapter Information" + "`n" }
     }
-
     $networkAdapters = Get-CimInstance -ClassName Win32_NetworkAdapter | Where-Object { $_.NetConnectionStatus -eq 2 }
     # Seulement les adaptateurs connectés
     if ($networkAdapters) {
@@ -197,124 +154,80 @@ function Get-SystemReport {
             $adapterConfig = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration | Where-Object { $_.InterfaceIndex -eq $_.InterfaceIndex }
             $ipAddress = if ($adapterConfig.IPAddress) { $adapterConfig.IPAddress -join ", " } else { "Aucune IP" }
             # Ajouter les informations de l'adaptateur réseau
-            $reportContent += "Adapter Name: " + $_.Name + "`n"
-            $reportContent += "MAC Address: " + $_.MACAddress + "`n"
-            $reportContent += "Speed: " + $_.Speed + " bps" + "`n"
-            $reportContent += "Adresse IP: " + $ipAddress + " bps" + "`n"
-            $reportContent += "`n"
+            $Message += "Adapter Name: " + $_.Name + "`n"
+            $Message += "MAC Address: " + $_.MACAddress + "`n"
+            $Message += "Adresse IP: " + $ipAddress + " bps" + "`n"
+            $Message += "Speed: " + $_.Speed + " bps" + "`n"
         }
     } else {
-        switch ($Language) {
-            "fr" { $reportContent += "Aucun adaptateur réseau connecté trouvé." + "`n" }
-            "es" { $reportContent += "No se encontraron adaptadores de red conectados." + "`n" }
-            "en" { $reportContent += "No connected network adapters found." + "`n" }
+        $Message += "No connected network adapters found." + "`n" 
+        }
+    $Message += "`n"
+
+    # Logiciels installés
+    switch ($Language) {
+        "fr" { $Message += "## Logiciels installés" + "`n" }
+        "es" { $Message += "## Programas instalados" + "`n" }
+        "en" { $Message += "## Installed Software" + "`n" }
+    }
+    $softwareList = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue
+    $softwareList | ForEach-Object {
+        if ($_.DisplayName) {
+            $Message += "$($_.DisplayName) $($_.DisplayVersion) (Vendor: $($_.Publisher))`n"
         }
     }
+    $Message += "`n"
 
-
-# Récupérer la liste des utilisateurs locaux
+    # Récupérer la liste des utilisateurs locaux
     switch ($Language) {
-        "fr" { $reportContent += "## Liste des utilisateurs locaux." + "`n" }
-        "es" { $reportContent += "## Lista de usuarios locales." + "`n" }
-        "en" { $reportContent += "## List of local users." + "`n" }
+        "fr" { $Message += "## Liste des utilisateurs locaux." + "`n" }
+        "es" { $Message += "## Lista de usuarios locales." + "`n" }
+        "en" { $Message += "## List of local users." + "`n" }
     }
     $users = Get-LocalUser
+
     # Boucle pour chaque utilisateur afin d'obtenir les groupes auxquels ils appartiennent
     foreach ($user in $users) {
         # Ajouter le nom de l'utilisateur au rapport
-        $reportContent += "`n" + "UserName : " + $user.Name 
-
+        $Message += "UserName : " + $user.Name
         # Initialiser un tableau pour stocker les groupes auxquels cet utilisateur appartient
         $userGroups = @()
-
-        # Récupérer tous les groupes locaux
+    
+        # Récupérer les groupes locaux et leurs membres
         $groups = Get-LocalGroup
-
-        # Vérifier pour chaque groupe si l'utilisateur est membre
         foreach ($group in $groups) {
-            # Essayer de récupérer les membres du groupe
+            # Récupérer les membres de chaque groupe
             $members = Get-LocalGroupMember -Group $group.Name
-            # Debug : Afficher les membres du groupe pour vérification
-            # Write-Host "Vérification du groupe : $($group.Name), membres : $($members.Name)"
             
-            # Comparer sans le préfixe du domaine/ordinateur
+            # Comparer chaque membre avec l'utilisateur actuel
             foreach ($member in $members) {
-            # Extraire uniquement le nom d'utilisateur sans le préfixe du domaine ou de l'ordinateur
-            $memberName = $member.Name.Split("\")[-1]  
-            # Cette ligne enlève le "machine\"
-                
-            # Comparer les noms d'utilisateur sans le préfixe du domaine/ordinateur
+                # Extraire uniquement le nom d'utilisateur sans le préfixe du domaine ou de l'ordinateur
+                $memberName = $member.Name.Split("\")[-1]
+            
+                # Si le membre est l'utilisateur actuel, l'ajouter aux groupes de l'utilisateur
                 if ($memberName -eq $user.Name) {
-                    $userGroups += $group.Name  
-                    # Ajouter le groupe au tableau si l'utilisateur est membre
+                    $userGroups += $group.Name
+                    break  # On arrête dès qu'on trouve un groupe correspondant
                 }
-            }  
+            }
         }
 
         # Si des groupes sont trouvés, les ajouter au rapport
         if ($userGroups.Count -gt 0) {
-            $reportContent += ": Security Groups : "
-            $userGroups | ForEach-Object {
-                $reportContent += " - " + $_ 
-            }
-        }else {
-            switch ($Language) {
-                "fr" { $reportContent += " : Security Groups : Aucun groupe de sécurité trouvé pour cet utilisateur." }
-                "es" { $reportContent += " : Security Groups : No se han encontrado grupos de seguridad para este usuario." }
-                "en" { $reportContent += " : Security Groups : No security groups found for this user." }
-            }
+            $Message += ": Security Groups : " + ($userGroups -join ", ") + "`n"
+        } else { 
+            # Gestion des utilisateurs sans groupes
+            $Message += " : Security Groups : No security groups found for this user." + "`n"    
         }
     }
-    $reportContent += "`n"
+    $Message += "`n"
 
-# Logiciels installés
-    $reportContent += "`n"
-    switch ($Language) {
-        "fr" { $reportContent += "## Logiciels installés" + "`n" }
-        "es" { $reportContent += "## Programas instalados" + "`n" }
-        "en" { $reportContent += "## Installed Software" + "`n" }
-    }
-    # Récupérer les informations sur les logiciels installés et leur date d'installation depuis le registre
-    $softwareList = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue
-    $softwareList32Bit = Get-ItemProperty -Path "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue
-
-    # Combiner les logiciels 64 bits et 32 bits
-    $allSoftware = $softwareList + $softwareList32Bit
-
-    # Ajouter chaque logiciel au rapport
-    $allSoftware | ForEach-Object {
-        # Assurez-vous qu'il y a un nom de programme
-        if ($_.DisplayName) {
-            $reportContent += $_.DisplayName + " " + $_.DisplayVersion + " (Vendor: " + $_.Publisher + ")"
-        
-            # Ajouter la date d'installation (formatée)
-            if ($_.InstallDate) {
-                # La date d'installation est souvent dans le format YYYYMMDD
-                $installDate = $_.InstallDate
-                $formattedDate = [datetime]::ParseExact($installDate, "yyyyMMdd", $null)
-                $reportContent += " - Install Date: " + $formattedDate.ToString("dd/MM/yyyy")
-            } else {
-                $reportContent += " - Install Date: Not Available"
-            }
-        $reportContent += "`n"
-        }
-    }
-    $reportContent += "`n"
-
-    # Écrire le rapport dans un fichier texte
-    $reportContent | Out-File -FilePath $outputFile
-
+    
+    # Écrire le rapport
+    Write-Log -LogPath $LogPath -LogName $LogName -Type $Type -Message $Message
     # Afficher l'emplacement du rapport
-    Write-Host "Le rapport a été généré et sauvegardé à l'emplacement suivant : $outputFile"
-
-# Fin de la fonction get-SystemReport
+    Write-Host "Le rapport a été généré et sauvegardé à l'emplacement suivant : $LogPath\$LogName"
 }
-
-# Exemple d'appel de la fonction pour générer un rapport en français
-# Get-SystemReport 
 
 # Exemple d'appel de la fonction pour générer un rapport en anglais
 # Get-SystemReport -Language "en"
-
-# Exemple d'appel de la fonction pour générer un rapport en espagnol
-# Get-SystemReport -Language "es"
