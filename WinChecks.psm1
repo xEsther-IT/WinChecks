@@ -16,6 +16,7 @@ $versionScript = "1.0."
 <#
 .SYNOPSIS
     Générer un rapport contenant les informations de sécurité du système d'exploitation Windows.
+    Import-Module .\WinChecks.psm1
 
 .DESCRIPTION
     Get-SystemReport.ps1 script PowerShell recherche les détails du matériel de l'ordinateur local et génère un rapport 
@@ -37,23 +38,22 @@ $versionScript = "1.0."
 
 .EXAMPLE
     # Pour générer un rapport en français
-	PS> ./Generate-SystemReport.ps1
+    PS> Get-SystemReport
     
     # Pour générer un rapport en anglais
-    PS> ./Generate-SystemReport -Language "en"
+    PS> Get-SystemReport -Language "en"
 
     # Pour générer un rapport en espagnol
-    PS> ./Generate-SystemReport -Language "es"
+    PS> Get-SystemReport -Language "es"
 	
 .LINK
 	https://github.com/xEsther-IT/WinChecks
 
 .NOTES
-    1.PowerShell en mode administrateur nécessaire.
-    2.Fonctionne nécessaire.
-        .\Write-Log.ps1 
-    
+    1.PowerShell 7.4 en mode administrateur nécessaire.
+    2.Import-Module .\WinChecks.psm1    
     Author: 2024 @xesther.meza | License: MIT
+    
 #>
 
 Function Get-SystemReport {
