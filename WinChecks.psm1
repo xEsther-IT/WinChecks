@@ -6,9 +6,29 @@
 
 #Versioning de la configuration
 #Release Notes
+#v1.0.5 - 2024-11-25-2:00
+# - Function : Get-WinCheckDefenderStatus - Pour obtenir des informations sur l'état du Windows Defender (antivirus).
+# - Function : Set-WinCheckDefenderConfig - Pour configurer 4 paramètres de sécurité sur Windows Defender (Antivirus). La fonction Set-WinCheckDefenderConfig permet de configurer 
+# quatre paramètres de sécurité de Windows Defender. Les paramètres sont d'abord vérifiés, puis définis le cas échéant, et toutes les actions sont enregistrées dans le fichier de log « WinChecksWindowsDefender ».
+# - - CloudExtendedTimeout : Prolonger la durée de l'analyse de sécurité du cloud jusqu'à un maximum de 60 secondes ; par défaut, elle est de 10 secondes.
+# - -> # https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender#cloudextendedtimeout
+# - -> # Définir la valeur du registre CloudExtendedTimeout à 60 minutes
+# - -> # Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows Defender" -Name "CloudExtendedTimeout" -Value 60
+# - - PurgeItemsAfterDelay : Supprime les éléments mis en quarantaine au bout d'un jour au lieu de les conserver indéfiniment comme c'est le cas par défaut.
+# - -> # https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-microsoftdefenderantivirus#quarantine_purgeitemsafterdelay 
+# - -> # Définir la valeur du registre Quarantine_PurgeItemsAfterDelay pour activer la suppression automatique après un délai
+# - -> # Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Quarantine" -Name "Quarantine_PurgeItemsAfterDelay" -Value 1
+# - - AllowFullScanOnMappedNetworkDrives : Permet à Microsoft Defender d'analyser les lecteurs réseau mappés pendant l'analyse complète.
+# - -> # https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender#allowfullscanonmappednetworkdrives
+# - -> # Activer l'analyse complète des lecteurs réseau mappés
+# - -> # Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Name "AllowFullScanOnMappedNetworkDrives" -Value 1
+# - - CheckForSignaturesBeforeRunningScan - Permet d'activer la vérification des mises à jour avant le scan
+# - -> # https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender#checkforsignaturesbeforerunningscan
+# - -> # Définir la valeur du registre CheckForSignaturesBeforeRunningScan à 1 pour activer la vérification des mises à jour avant le scan
+# - -> # Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Name "CheckForSignaturesBeforeRunningScan" -Value 1
 #v1.0.4 - 2024-11-21-5:04
-# - Functions : Start-WinChecks / Show-WinCheksMenu - Pour creer une menu avec les commandes disponibles dans le module
-# - Function : Get-WinCheckMinimumRequired - Pour verifier minimums (powerShell 7.4, bypass, executer as admin) avant utilisation du module pour assurer les prérequis.
+# - Functions : Start-WinChecks / Show-WinCheksMenu - Fonction principale pour afficher le menu avec les commandes disponibles dans le module et exécuter les choix
+# - Function : Get-WinCheckMinimumRequired - Fonction permettant de vérifier les prérequis minimaux (version de PowerShell, privilèges d'administrateur, politique d'exécution) pour garantir le bon fonctionnement du module.
 # - Renomer funtions pour respecter les bonnes pratiques pour le module WinCheck 
 # - - Get-SystemReport -> Get-WinCheckReport
 # - - Get-BasicSystemInfo -> Get-WinCheckBasicSystemInfo
@@ -16,9 +36,9 @@
 # - - Write-Log -> Write-WinCheckLog
 #v1.0.3 - 2024-11-20-4:37
 # - Les vérifications (« checks ») ont été séparées en fonctions distinctes.
-# - Function : Get-WinCheckBasicSystemInfo - Pour
-# - Function : Get-WinCheckLocalUserInGroups - Pour 
-# - Function : Get-WinCheckInstalledApplications - Pour 
+# - Function : Get-WinCheckBasicSystemInfo - Fonction permettant d'obtenir les informations système d'exploitation de base.
+# - Function : Get-WinCheckLocalUserInGroups - Fonction pour obtenir les utilisateurs locaux et leurs groupes
+# - Function : Get-WinCheckInstalledApplications - Fonction pour obtenir les applications installées 
 #v1.0.2 - 2024-11-19-23:51
 # - Creation des variables gobales ($scriptVersion, $language)
 # - Correction des erreurs mineures de traduction « fr » - « es » - « en » 
@@ -31,7 +51,7 @@
 # - Function Write-WinCheckLog
 
 # # # VARIABLES GLOBALES # # #
-$moduleVersion = "v1.0.4"
+$moduleVersion = "v1.0.5"
 #$moduleDate = [datetime]::ParseExact("2024-09-08-11:00", 'yyyy-MM-dd-HH:mm', $null)
 # $language = "fr" - Francais par default. Options : "es" - Espanol, "en" - English
 $global:language = "fr"
@@ -54,34 +74,36 @@ function Start-WinChecks { # Fonction principale pour afficher le menu et exécu
     do {
         # Afficher les options du menu
         Write-Host "Module Windows-Security-Checks $moduleVersion Created by @xesther.meza "  -ForegroundColor Cyan
-        Write-Host "This PowerShell script performs security checks on a Windows system" + "`n"
+        Write-Host "Ce script PowerShell effectue des contrôles de sécurité sur un système Windows`n"
         Show-WinCheksMenu
         
         switch ($language) {
-            "fr" { $choice = Read-Host "Choisissez une option" }
-            "es" { $choice = Read-Host "Elija una opción" }
-            "en" { $choice = Read-Host "Choose an option" }
+            "fr" { $choix = Read-Host "Choisissez une option" }
+            "es" { $choix = Read-Host "Elija una opción" }
+            "en" { $choix = Read-Host "Choose an option" }
         }
 
         # Traiter le choix de l'utilisateur et exécuter la fonction correspondante
-        switch ($choice) {
+        switch ($choix) {
             "1" { Get-WinCheckMinimumRequired }
             "2" { Get-WinCheckBasicSystemInfo }
             "3" { Get-WinCheckLocalUserInGroups }
             "4" { Get-WinCheckInstalledApplications }
-            "5" { Get-WinCheckSystemReport }
-            "0" { Write-Host "Exit..." -ForegroundColor Yellow; break }
-            default { Write-Host "Invalid choice, please try again." -ForegroundColor Red }
+            "5" { Get-WinCheckDefenderStatus }
+            "6" { Set-WinCheckDefenderConfig}
+            "7" { Get-WinCheckSystemReport }
+            "0" { Write-Host "Sortir..." -ForegroundColor Yellow; break }
+            default { Write-Host "Choix non valide, veuillez réessayer." -ForegroundColor Red }
         }
 
-        Read-Host "Press Enter to continue..."
+        Read-Host "Appuyez sur la touche Entrée pour continuer..."
         Clear-Host
-    } while ($choice -ne "0")
+    } while ($choix -ne "0")
 
 
 } # END function Start-WinChecks
 
-function Show-WinCheksMenu { # function Show-WinCheksMenu qui affiche un menu d'options basé sur la langue definit. 
+function Show-WinCheksMenu { # Function Show-WinCheksMenu qui affiche un menu d'options basé sur la langue definit. 
 # Exemple d'utilisation
 # Show-Menu
     $menuFr = @"
@@ -90,7 +112,9 @@ function Show-WinCheksMenu { # function Show-WinCheksMenu qui affiche un menu d'
     2. Afficher les informations système de base
     3. Lister les utilisateurs locaux et leurs groupes
     4. Lister les applications installées
-    5. Générer un rapport système complet
+    5. Lister Informations sur WindowsDefender (Antivirus)
+    6. ---Configurer WindowsDefender Security
+    7. Générer un rapport système complet
     0. Quitter
     ========================
 "@
@@ -101,7 +125,9 @@ function Show-WinCheksMenu { # function Show-WinCheksMenu qui affiche un menu d'
     2. Mostrar información básica del sistema
     3. Listar los usuarios locales y sus grupos
     4. Listar las aplicaciones instaladas
-    5. Generar un informe completo del sistema
+    5. Listar Información sobre WindowsDefender (Antivirus)
+    6. ---Configurar WindowsDefender Security
+    7. Generar un informe completo del sistema
     0. Salir
     ========================
 "@
@@ -112,7 +138,9 @@ function Show-WinCheksMenu { # function Show-WinCheksMenu qui affiche un menu d'
     2. Display basic system information
     3. List local users and their groups
     4. List installed applications
-    5. Generate a complete system report
+    5. List Information about WindowsDefender (Antivirus)
+    6. ---Configurer WindowsDefender Security
+    7. Generate a complete system report
     0. Exit
     ========================
 "@
@@ -125,7 +153,7 @@ function Show-WinCheksMenu { # function Show-WinCheksMenu qui affiche un menu d'
     }
 } # END function : Show-WinCheksMenu
 
-function Get-WinCheckMinimumRequired { # Fonction pour vérifier les prérequis minimaux 
+function Get-WinCheckMinimumRequired { # Fonction permettant de vérifier les prérequis minimaux (version de PowerShell, privilèges d'administrateur, politique d'exécution) pour garantir le bon fonctionnement du module.
 
     # Vérifier la version de PowerShell
     switch ($language) {
@@ -135,8 +163,8 @@ function Get-WinCheckMinimumRequired { # Fonction pour vérifier les prérequis 
     }
     $requiredVersion = [Version]"7.4.0"
     $currentVersion = $PSVersionTable.PSVersion
+
     # Comparer la version actuelle avec la version requise
-    
     switch ($language) {
         "fr" { 
             if ($currentVersion -lt $requiredVersion) {
@@ -199,10 +227,10 @@ function Get-WinCheckMinimumRequired { # Fonction pour vérifier les prérequis 
         }
         "en" { 
             if ($message -match 'Administrators') {
-                Write-Host "The user has administrator privileges. $message" -ForegroundColor Green
-                Write-Host "Make sure you have run PowerShell as administrator." -ForegroundColor Yellow
+                Write-Host "L'utilisateur a des privilèges d'administrateur. $message" -ForegroundColor Green
+                Write-Host "Assurez-vous que vous avez exécuté PowerShell en tant qu'administrateur." -ForegroundColor Yellow
             } else {
-                Write-Host "$message The user does not have administrator privileges." -ForegroundColor Red
+                Write-Host "$message L'utilisateur ne dispose pas de privilèges d'administrateur." -ForegroundColor Red
             } 
         }
     }
@@ -247,7 +275,314 @@ function Get-WinCheckMinimumRequired { # Fonction pour vérifier les prérequis 
         }
     }
     
-} # END de function : Get-WinCheckMinimumRequired 
+} # END de function : Get-WinCheckMinimumRequired
+
+function Get-WinCheckDefenderStatus{ # Pour obtenir des informations sur l'état du Windows Defender (antivirus).
+    try {
+        # Obtenir l'état de Windows Defender
+        $defenderStatus = Get-MpComputerStatus -ErrorAction SilentlyContinue
+
+        # Initialisation de la variable pour stocker le message à afficher
+        $checkMessage = "## État actuel de Windows Defender" + "`n"
+
+        # Vérifier si Windows Defender est activé
+        if ($defenderStatus.AntivirusEnabled) {
+            $checkMessage += "Windows Defender Antivirus est activé." + "`n"
+        } else {
+            $checkMessage += "Windows Defender Antivirus n'est pas activé." + "`n"
+        }
+
+        # Affichage si la protection en temps réel est activée
+        if ($defenderStatus.RealTimeProtectionEnabled -eq $true) {
+            $checkMessage += "La protection en temps réel est activée." + "`n"
+        } else {
+            $checkMessage += "La protection en temps réel est désactivée." + "`n"
+        }
+
+        # Vérifier si les signatures antivirus sont à jour
+        $lastUpdated = $defenderStatus.AntivirusSignatureLastUpdated
+        if ($lastUpdated) {
+            $checkMessage += "Dernière mise à jour des signatures antivirus : $($lastUpdated.ToString('yyyy-MM-dd HH:mm:ss'))" + "`n"
+        } else {
+            $checkMessage += "Impossible de récupérer l'heure de la dernière mise à jour des signatures." + "`n"
+        }
+
+        # Vérifier si la protection contre les logiciels espions est activée
+        if ($defenderStatus.AntispywareEnabled) {
+            $checkMessage += "La protection contre les logiciels espions est activée." + "`n"
+        } else {
+            $checkMessage += "La protection contre les logiciels espions n'est pas activée." + "`n"
+        }
+
+        # Vérifier si l'analyse rapide a été lancée
+        if ($defenderStatus.QuickScanStartTime) {
+            $checkMessage += "Dernière analyse rapide lancée : $($defenderStatus.QuickScanStartTime)" + "`n"
+        } else {
+            $checkMessage += "Aucune analyse rapide lancée récemment." + "`n"
+        }
+
+        # Vérification finale : Windows Defender fonctionne correctement si toutes les conditions sont réunies
+        if ($defenderStatus.AntivirusEnabled -eq $true -and 
+            $defenderStatus.RealTimeProtectionEnabled -eq $true -and 
+            $defenderStatus.AMRunningMode -eq 'Normal' -and 
+            $defenderStatus.AntivirusSignatureLastUpdated -gt (Get-Date).AddDays(-2) -and 
+            $defenderStatus.AntispywareEnabled -eq $true) {
+            $checkMessage += "`n" + "## Windows Defender fonctionne normalement." + "`n"
+        } else {
+            $checkMessage += "`n" + "## Un ou plusieurs paramètres de Windows Defender ne sont pas optimaux." + "`n"
+        }
+        
+    } catch {
+        # Gérer les erreurs potentielles, par exemple si Get-MpComputerStatus échoue
+        $checkMessage += "Erreur lors de la récupération de l'état de Windows Defender : $_"
+        Write-Host $checkMessage -ForegroundColor Red    
+    }
+    return $checkMessage
+} # END functionn : Get-WinCheckDefenderStatus
+
+function Set-WinCheckDefenderConfig { # Pour configurer 4 paramètres de sécurité sur Windows Defender (Antivirus).
+# La fonction Set-WinCheckDefenderConfig permet de configurer quatre paramètres de sécurité de Windows Defender.
+# Les paramètres sont d'abord vérifiés, puis définis le cas échéant, et toutes les actions sont enregistrées dans le fichier de log « WinChecksWindowsDefender ».
+
+    $date = Get-Date -Format "yyyy-MM-dd"
+    # Définir les entrées de la fonction Write-WinCheckLog
+    $logPath = "C:\Temp\xLuna"              # Répertoire où le fichier de log sera stocké
+    $logName= 'WinChecksWindowsDefender-'+$date+'.log'  # Nom du fichier
+    $typeMessage = 'Info'                   # Type de message (Info, Success, Error)
+    $logMessage = "## Windows Defender Security Configuration"        # Message
+    Write-WinCheckLog -LogPath $logPath -LogName $logName -Type $typeMessage -Message $logMessage
+
+    # Vérifier l'état actuel de Windows Defender Antivirus
+    try {
+        # Récupérer les préférences de Windows Defender
+        $defenderStatus = Get-MpPreference
+
+        # Vérifier si Windows Defender est activé ou non
+        if ($defenderStatus.AntivirusEnabled -eq $false) {
+            Write-Host "Activation de Windows Defender Antivirus..." -ForegroundColor Green
+            
+            # Activer Windows Defender Antivirus
+            Set-MpPreference -DisableAntivirus $false -ErrorAction SilentlyContinue
+            # Vérifier de nouveau si la protection antivirus est activée
+            $defenderStatus = Get-MpPreference  
+
+            # Log du succès
+            $logMessage = "Windows Defender Antivirus a été activé."
+            Write-Host $logMessage -ForegroundColor Green
+            Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Success' -Message $logMessage
+        } else {
+            # Si déjà activé, log et message indiquant l'état actuel
+            $logMessage = "Windows Defender Antivirus est déjà activé : $($defenderStatus.AntivirusEnabled)"
+            Write-Host $logMessage -ForegroundColor Green
+            Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Info' -Message $logMessage
+        }
+
+        # Vérifier si les définitions de Windows Defender sont à jour
+        $definitionsLastUpdated = $defenderStatus.AntivirusSignatureLastUpdated
+        if ($definitionsLastUpdated) {
+            if ($definitionsLastUpdated -lt (Get-Date).AddDays(-2)) {
+                Write-Host "Les définitions de Windows Defender ne sont pas à jour. Mise à jour en cours..." -ForegroundColor Green
+                # Planifier la mise à jour des signatures
+                Set-MpPreference -SignatureScheduleDay 0 -SignatureScheduleTime 0 -ErrorAction SilentlyContinue
+                Update-MpSignature -ErrorAction SilentlyContinue
+
+                # Log de mise à jour des signatures
+                $logMessage = "Les signatures de Windows Defender ont été mises à jour."
+                Write-Host $logMessage -ForegroundColor Green
+                Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Success' -Message $logMessage
+            } else {
+                Write-Host "Les définitions de Windows Defender sont à jour." -ForegroundColor Green
+            }
+        } else {
+            Write-Host "Impossible de récupérer l'heure de la dernière mise à jour des signatures." -ForegroundColor Red
+            $logMessage = "Erreur: Impossible de récupérer l'heure de la dernière mise à jour des signatures."
+            Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Error' -Message $logMessage
+        }
+    } catch {
+        # En cas d'erreur, capturer l'exception et afficher un message
+        $logMessage = "Erreur lors de l'activation de la protection contre les virus et menaces : $_"
+        Write-Host $logMessage -ForegroundColor Red
+        Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Error' -Message $logMessage
+    }
+    # Si vous voulez désactiver Windows Defender (ne le faites que si vous avez un autre antivirus)
+    # Set-MpPreference -DisableAntivirus $true
+
+
+    # CloudExtendedTimeout : Prolonger la durée de l'analyse de sécurité du cloud jusqu'à un maximum de 60 secondes
+    # Documentation : https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender#cloudextendedtimeout
+    # Définir la valeur du registre CloudExtendedTimeout à 60 minutes
+    # Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows Defender" -Name "CloudExtendedTimeout" -Value 60
+    $path = "HKLM:\Software\Policies\Microsoft\Windows Defender"
+    $name = "CloudExtendedTimeout"
+    $value = 60
+    
+    if(Test-WinChecksRegistryKey -Path $path -Name $name){
+        try {
+            $actualCloudExtendedTimeout = Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue
+            $logMessage = "Valeur actuelle du $name : " + $($actualCloudExtendedTimeout.CloudExtendedTimeout) 
+            Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Info' -Message $logMessage
+        } catch {
+            $logMessage = "$name n'est pas défini: $_" 
+            Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Error' -Message $logMessage
+        }
+    } else {
+        # Définir la valeur de CloudExtendedTimeout à 60 si elle n'est pas déjà définie
+        # Set-WinChecksRegistryKey -Path $path -Name $name -Value $value -ErrorAction SilentlyContinue
+        $logMessage = "$name est défini sur 60 secondes."
+        Write-Host $logMessage -ForegroundColor Green
+        Write-Information "CloudExtendedTimeout : Prolonger la durée de l'analyse de sécurité du cloud jusqu'à un maximum de 60 secondes"
+        Write-Information "Documentation : https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender#cloudextendedtimeout"
+        Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Info' -Message $logMessage
+    }
+
+    # PurgeItemsAfterDelay : Supprime les éléments mis en quarantaine après un jour
+    # Documentation : https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-microsoftdefenderantivirus#quarantine_purgeitemsafterdelay
+    # Définir la valeur de Quarantine_PurgeItemsAfterDelay à 1 si elle n'est pas déjà définie
+    # Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Quarantine" -Name "Quarantine_PurgeItemsAfterDelay" -Value 1
+    $path = "HKLM:\Software\Policies\Microsoft\Windows Defender\Quarantine"
+    $name = "PurgeItemsAfterDelay"
+    $value = 1  # Défini sur 1 jour
+
+    if (Test-WinChecksRegistryKey -Path $path -Name $name) {
+        try {
+            $actualPurgeItemsAfterDelay = Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue
+            $logMessage = "Valeur actuelle de $name : " + $($actualPurgeItemsAfterDelay.PurgeItemsAfterDelay)
+            Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Info' -Message $logMessage
+        } catch {
+            $logMessage = "$name n'est pas défini : $_" 
+            Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Error' -Message $logMessage
+        }
+    } else {
+        # Définir la valeur de PurgeItemsAfterDelay à 1 (supprimer après 1 jour)
+        # Set-WinChecksRegistryKey -Path $path -Name $name -Value $value -ErrorAction SilentlyContinue
+        $logMessage = "$name est défini sur 1 jour."
+        Write-Host $logMessage -ForegroundColor Green
+        Write-Information "PurgeItemsAfterDelay : Supprime les éléments mis en quarantaine après un jour"
+        Write-Information "Documentation : https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-microsoftdefenderantivirus#quarantine_purgeitemsafterdelay"
+        Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Info' -Message $logMessage
+    }
+    
+    # AllowFullScanOnMappedNetworkDrives : Permet à Defender d'analyser les lecteurs réseau mappés pendant l'analyse complète
+    # Documentation : https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender#allowfullscanonmappednetworkdrives
+    # Définir la valeur de AllowFullScanOnMappedNetworkDrives à 1 si elle n'est pas déjà définie
+    # Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Name "AllowFullScanOnMappedNetworkDrives" -Value 1
+    $path = "HKLM:\Software\Policies\Microsoft\Windows Defender\Scan"
+    $name = "AllowFullScanOnMappedNetworkDrives"
+    $value = 1
+    
+    if (Test-WinChecksRegistryKey -Path $path -Name $name) {
+        try {
+            $actualAllowFullScanOnMappedNetworkDrives = Get-ItemProperty -Path $path -Name $name
+            $logMessage = "Valeur actuelle de $name : " + $($actualAllowFullScanOnMappedNetworkDrives.AllowFullScanOnMappedNetworkDrives)
+            Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Info' -Message $logMessage
+        } catch {
+            $logMessage = "$name n'est pas défini : $_" 
+            Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Error' -Message $logMessage
+        }
+    } else {
+        # Définir la valeur de AllowFullScanOnMappedNetworkDrives à 1
+        # Set-WinChecksRegistryKey -Path $path -Name $name -Value $value -ErrorAction SilentlyContinue
+        $logMessage = "$name est défini sur 1."
+        Write-Host $logMessage -ForegroundColor Green
+        Write-Information "PurgeItemsAfterDelay : Supprime les éléments mis en quarantaine après un jour "
+        Write-Information "Documentation : https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-microsoftdefenderantivirus#quarantine_purgeitemsafterdelay"
+        Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Info' -Message $logMessage
+    }
+    
+    # CheckForSignaturesBeforeRunningScan : Vérifie les signatures avant de lancer une analyse
+    # Documentation : https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender#checkforsignaturesbeforerunningscan
+    # Définir la valeur de CheckForSignaturesBeforeRunningScan à 1 si elle n'est pas déjà définie
+    # Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Name "CheckForSignaturesBeforeRunningScan" -Value 1 
+    $path = "HKLM:\Software\Policies\Microsoft\Windows Defender\Scan"
+    $name = "CheckForSignaturesBeforeRunningScan"
+    $value = 1
+    
+    if (Test-WinChecksRegistryKey -Path $path -Name $name) {
+        try {
+            $actualCheckForSignaturesBeforeRunningScan = Get-ItemProperty -Path $path -Name $name
+            $logMessage = "Valeur actuelle de $name : " + $($actualCheckForSignaturesBeforeRunningScan.CheckForSignaturesBeforeRunningScan)
+            Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Info' -Message $logMessage
+        } catch {
+            $logMessage = "$name n'est pas défini : $_" 
+            Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Error' -Message $logMessage
+        }
+    } else {
+        # Définir la valeur de CheckForSignaturesBeforeRunningScan à 1
+        # Set-WinChecksRegistryKey -Path $path -Name $name -Value $value -ErrorAction SilentlyContinue
+        $logMessage = "$name est défini sur 1."
+        Write-Host $logMessage -ForegroundColor Green
+        Write-Information "CheckForSignaturesBeforeRunningScan : Vérifie les signatures avant de lancer une analyse"
+        Write-Information "Documentation : https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender#checkforsignaturesbeforerunningscan"
+        Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Info' -Message $logMessage
+    }
+} # END de la fonction : Set-WinCheckDefenderConfig
+
+function Set-WinChecksRegistryKey {
+    Param (
+        [string]$path,        # Chemin de la clé de registre à configurer
+        [string]$name,        # Nom de la valeur à configurer
+        [string]$value        # Valeur à configurer
+    )
+    # Variable pour indiquer si la clé a été modifiée avec succès
+    [bool]$keyModifie = $false
+
+    # Vérifier si la clé et la valeur existent
+    if(Test-WinChecksRegistryKey -path $path -name $name){
+        # Si la clé existe, tenter de modifier ou ajouter la valeur
+        try {
+            Set-ItemProperty -Path $path -Name $name -Value $value -ErrorAction SilentlyContinue
+            $keyModifie = $true
+            Write-Host "La valeur '$name' a été mise à jour avec succès." -ForegroundColor Green
+        }
+        catch {
+            $keyModifie = $false
+            Write-Host "Erreur lors de la mise à jour de la valeur '$name' : $_" -ForegroundColor Red
+        }
+    } else {
+        # Si la clé n'existe pas, la créer et définir la valeur
+        try {
+            New-Item -Path $path -Force | Out-Null
+            Set-ItemProperty -Path $path -Name $name -Value $value
+            $keyModifie = $true
+            Write-Host "La clé '$path' a été créée et la valeur '$name' a été définie à '$value'." -ForegroundColor Green
+        } catch {
+            $keyModifie = $false
+            Write-Host "Erreur lors de la création de la clé ou de la définition de la valeur : $_" -ForegroundColor Red
+        }
+    }
+    # Retourner l'état de la modification
+    return $keyModifie
+} # END de la function : Set-WinChecksRegistryKey 
+
+function Test-WinChecksRegistryKey {
+    Param (
+        [string]$path,        # Chemin de la clé de registre à vérifier
+        [string]$name         # Nom de la valeur à vérifier
+    )
+    # Variable pour indiquer si la clé a été vérifiée avec succès
+    [bool]$keyVerifie = $false
+
+    # Vérifier si la clé de registre existe
+    if (Test-Path $path) {
+        # Si la clé existe, tenter de lire la valeur
+        try {
+            $registryValue = Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue
+            # Si la valeur est trouvée, afficher un message
+            Write-Host "$name - Valeur trouvée: $($registryValue.$name)" -ForegroundColor Green
+            $keyVerifie = $true
+        } catch {
+            # Si la valeur n'existe pas, enregistrer un message d'erreur
+            $keyVerifie = $false
+            Write-Host "La valeur '$name' ne peut pas être récupérée : $_" -ForegroundColor Red
+        }
+    } else {
+        # Si la clé n'existe pas, enregistrer un message d'erreur
+        $keyVerifie = $false
+        Write-Host "La clé de registre '$path' n'existe pas." -ForegroundColor Red
+    }
+    # Retourner l'état de la vérification
+    return $keyVerifie 
+} # END de la function : Test-WinChecksRegistryKey
 
 <# # Fonction pour générer un rapport système complet
 .SYNOPSIS
@@ -332,6 +667,10 @@ function Get-WinCheckSystemReport { # Fonction pour générer un rapport systèm
     # Récupérer les applications 
     $message += Get-WinCheckInstalledApplications
     $message += "`n"
+
+    # Récupérer WindowsDefender status information
+    $message += Get-WinCheckDefenderStatus
+    $message += "`n"
     
     # Afficher l'emplacement du rapport
     switch ($language) {
@@ -345,7 +684,7 @@ function Get-WinCheckSystemReport { # Fonction pour générer un rapport systèm
 
 } # END de function : Get-WinCheckSystemReport
 
-function Get-WinCheckBasicSystemInfo { # Fonction pour obtenir les informations système de base
+function Get-WinCheckBasicSystemInfo { # Fonction permettant d'obtenir les informations système d'exploitation de base.
     # Récupérer les informations de base sur le système
     # - Informations OS
     # - Informations sur le processeur
@@ -613,12 +952,12 @@ function Get-WinCheckInstalledApplications { # Fonction pour obtenir les applica
 	Author: 2024 @xesther.meza | License: MIT
 
 #>
-Function Write-WinCheckLog { # Fonction pour créer le fichier du rapport
+function Write-WinCheckLog { # Fonction pour créer le fichier du rapport
     Param (
         [string]$logPath,   # Chemin du répertoire où enregistrer le fichier de log
-        [string]$logName,    # Nom du fichier de log
-        [string]$typeMessage,       # Type de message (Info, Success, Error)
-        [string]$message     # Message à enregistrer
+        [string]$logName,   # Nom du fichier de log
+        [string]$typeMessage,   # Type de message (Info, Success, Error)
+        [string]$message    # Message à enregistrer
     )
 
     # Format de la date (exemple: "2024-11-17 12:45:30")
