@@ -1,5 +1,6 @@
 # WinChecks
 WinChecks est un script PowerShell qui effectue des contrôles de sécurité sur un système d'exploitation Windows en vérifiant l'état de Windows Defender. Le script génère ensuite un rapport avec les résultats et l'envoie dans un fichier texte. Cet outil permet de vérifier rapidement le niveau de sécurité d'un système Windows et d'identifier tout problème potentiel à résoudre. Utilisation à vos propres risques et périls.
+
 Créé par @xesther.meza.
 
 # Clause de non-responsabilité 
@@ -7,14 +8,16 @@ Ce script est fourni tel quel et sans garantie. Vous l'utilisez à vos risques e
 
 # Avant commencer
 1. Téléchargez les fichiers WinChecks.psd1 et WinChecks.psm1, soit en cliquant sur le bouton Download, soit en clonant le dépôt GitHub https://github.com/xEsther-IT/WinChecks 
-2. Enregistrez les deux fichiers dans un répertoire de votre choix..
+2. Enregistrez les deux fichiers dans un répertoire de votre choix.
 3. Ouvrez PowerShell en tant qu'administrateur.
 4. Naviguez jusqu'au répertoire du module. C'est dans le répertoire où vous avez enregistré les fichiers WinChecks.psd1 et WinChecks.psm1 que vous devez naviguer.
 5. Pour commencer, exécutez la commande PowerShell comme suit : 
 
 # Installation du module 
 📫 Pour installer le module WinChecks, exécutez la commande suivante dans PowerShell :
+#
 Install-Module -Name WinChecks
+#
 
 # Importation du module
 📫 Une fois le module installé, utilisez la commande suivante pour l'importer :
