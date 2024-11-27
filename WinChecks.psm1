@@ -5,7 +5,7 @@
 #
 #Versioning de la configuration
 #Release Notes
-#v1.0.6 - 2024-11-27-9:25
+#v1.0.6 - 2024-11-27-11:01
 # - Corrections dans la fonction Set-WinCheckDefenderConfig : policy-csp-defender 
 # - Une alerte a été ajoutée au menu : ATTENTION : option 6. Modifie le registre de Windows.
 # - Get-WinCheckMinimumRequired - Fonctionnalité ajoutée : # Vérifiez que PowerShell a été lancé en tant qu'administrateur.
