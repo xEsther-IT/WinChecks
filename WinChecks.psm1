@@ -5,7 +5,7 @@
 #
 #Versioning de la configuration
 #Release Notes
-#v1.0.6
+#v1.0.6 - 2024-11-27-9:25
 # - Corrections dans la fonction Set-WinCheckDefenderConfig : policy-csp-defender 
 # - Une alerte a été ajoutée au menu : ATTENTION : option 6. Modifie le registre de Windows.
 # - Get-WinCheckMinimumRequired - Fonctionnalité ajoutée : # Vérifiez que PowerShell a été lancé en tant qu'administrateur.
@@ -365,7 +365,7 @@ function Get-WinCheckMinimumRequired { # Verifie les prérequis minimaux afin de
     
 } # END de function : Get-WinCheckMinimumRequired
 
-function Get-WinCheckDefenderStatus{ # Pour obtenir des informations sur l'état du Windows Defender (antivirus).
+function Get-WinCheckDefenderStatus{ # Obtiens des informations sur l'état du Windows Defender (antivirus).
 <#
 .DESCRIPTION
 	Get-WinCheckDefenderStatus. Obtiens des informations sur l'état de Windows Defender (l'antivirus natif de Windows)
@@ -520,7 +520,7 @@ function Get-WinCheckDefenderStatus{ # Pour obtenir des informations sur l'état
     return $checkMessage
 } # END functionn : Get-WinCheckDefenderStatus
 
-function Set-WinCheckDefenderConfig { # Pour configurer 4 paramètres de sécurité sur Windows Defender (Antivirus).
+function Set-WinCheckDefenderConfig { # Configure 4 paramètres de sécurité sur Windows Defender (Antivirus).
 # La fonction Set-WinCheckDefenderConfig permet de configurer quatre paramètres de sécurité de Windows Defender.
 # Les paramètres sont d'abord vérifiés, puis définis le cas échéant, et toutes les actions sont enregistrées dans le fichier de log « WinChecksWindowsDefender ».
 
@@ -694,10 +694,10 @@ function Set-WinCheckDefenderConfig { # Pour configurer 4 paramètres de sécuri
     }
 } # END de fonction : Set-WinCheckDefenderConfig
 
-function Set-WinChecksRegistryKey {
+function Set-WinChecksRegistryKey { #Configure des clés de registre Windows
 <#
 .DESCRIPTION
-	Set-WinChecksRegistryKey. Configurer des clés de registre Windows ou ajouter des valeurs spécifiques dans le registre. 
+	Set-WinChecksRegistryKey. Configure des clés de registre Windows ou ajouter des valeurs spécifiques dans le registre. 
 .PARAMETER -path
     Le chemin de la clé de registre où la valeur doit être ajoutée ou modifiée
 .PARAMETER -name
@@ -797,7 +797,7 @@ function Test-WinChecksRegistryKey { # Vérifie l'existence d'une clé de regist
     return $registry 
 } # END de function : Test-WinChecksRegistryKey
 
-function Get-WinCheckSystemReport { # Générer un rapport contenant les informations de sécurité du système
+function Get-WinCheckSystemReport { # Génere un rapport contenant les informations de sécurité du système
 <# 
 .SYNOPSIS
      Get-WinCheckSystemReport. Générer un rapport contenant les informations de sécurité du système d'exploitation Windows.
@@ -1033,7 +1033,7 @@ function Get-WinCheckBasicSystemInfo { # Collecte des informations de base sur l
     return $checkMessage
 } # END function : Get-WinCheckBasicSystemInfo
  
-function Get-WinCheckLocalUserInGroups { # Récupére les utilisateurs locaux d'un système Windows ainsi que les groupes auxquels ces utilisateurs appartiennent. 
+function Get-WinCheckLocalUserInGroups { # Récupere les utilisateurs locaux d'un système Windows ainsi que les groupes auxquels ces utilisateurs appartiennent. 
 <#
 .DESCRIPTION
 	Get-WinCheckLocalUserInGroups. Récupére les utilisateurs locaux d'un système Windows ainsi que les groupes auxquels ces utilisateurs appartiennent. 
@@ -1119,7 +1119,7 @@ function Get-WinCheckLocalUserInGroups { # Récupére les utilisateurs locaux d'
     return $checkMessage
 } # END function : Get-WinCheckLocalUserInGroups
 
-function Get-WinCheckInstalledApplications { # Fonction pour obtenir les applications installées
+function Get-WinCheckInstalledApplications { # Récupere les applications installées
 <#
 .DESCRIPTION
 	Get-WinCheckInstalledApplications. Récupérer et de lister les applications installées sur un système Windows, séparées en deux catégories : les applications 64 bits et les applications 32 bits. 
@@ -1173,8 +1173,8 @@ function Get-WinCheckInstalledApplications { # Fonction pour obtenir les applica
     return $checkMessage
 } # END function : Get-WinCheckInstalledApplications
 
-function Write-WinCheckLog { # Fonction pour créer le fichier du rapport
-    <#
+function Write-WinCheckLog { # Écrire des messages (chains de caracteres) dans un fichier spécifié.
+<#
 .DESCRIPTION
 	Write-WinCheckLog. Écrire des messages (chains de caracteres) dans un fichier spécifié. Le script Write-WinCheckLog.ps1 permet d'écrire des messages dans un fichier spécifié tout en affichant les messages dans la console avec une coloration appropriée en fonction du type de message. 
     Ce script permet également de créer des rapports au format texte ou des fichiers de log.
