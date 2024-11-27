@@ -65,7 +65,7 @@ Ce script PowerShell effectue des contrôles de sécurité sur un système Windo
 - Corriger l'erreur de présentation des adresses IP.
 
 👀 v2.0.0
-Choisir une langue (français, espagnol ou anglais) et la maintenir dans tous les messages, logs et rapports. La gestion de trois langues est devenue très difficile.
+- Choisir une langue (français, espagnol ou anglais) et la maintenir dans tous les messages, logs et rapports. La gestion de trois langues est devenue très difficile.
 
 👀 v3.0.0
 - Set-WinCheckUsers : Limiter les accès. Restreindre les permissions et n'accorder l'accès aux systèmes qu'aux utilisateurs qui en ont besoin
