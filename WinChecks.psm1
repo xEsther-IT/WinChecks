@@ -5,7 +5,7 @@
 #
 #Versioning de la configuration
 #Release Notes
-#v1.0.6 - 2024-11-27-11:01
+#v1.0.6 - 2024-11-27-11:07
 # - Corrections dans la fonction Set-WinCheckDefenderConfig : policy-csp-defender 
 # - Une alerte a été ajoutée au menu : ATTENTION : option 6. Modifie le registre de Windows.
 # - Get-WinCheckMinimumRequired - Fonctionnalité ajoutée : # Vérifiez que PowerShell a été lancé en tant qu'administrateur.
@@ -24,11 +24,6 @@
 # - -> # ✅ Windows 10, version 1507 [10.0.10240] and later
 # - -> # Définir la valeur du registre Quarantine_PurgeItemsAfterDelay pour activer la suppression automatique après un délai
 # - -> # Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Quarantine" -Name "DaysToRetainCleanedMalware" -Value 1
-# - - AllowFullScanOnMappedNetworkDrives : Permet à Microsoft Defender d'analyser les lecteurs réseau mappés pendant l'analyse complète.
-# - -> # https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender 
-# - -> # ✅ Windows 10, version 1607 [10.0.14393] and later
-# - -> # Activer l'analyse complète des lecteurs réseau mappés
-# - -> # Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows Defender\Scan" -Name "AllowFullScanOnMappedNetworkDrives" -Value 1
 # - - CheckForSignaturesBeforeRunningScan - Permet d'activer la vérification des mises à jour avant le scan
 # - -> # https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender
 # - -> # ✅ Windows 10, version 1809 [10.0.17763] and later
@@ -458,7 +453,6 @@ function Get-WinCheckDefenderStatus{ # Obtiens des informations sur l'état du W
         # Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows Defender" -Name "CloudExtendedTimeout" -Value 60
         $path = "HKLM:\Software\Policies\Microsoft\Windows Defender\MpEngine"
         $name = "CloudExtendedTimeout"
-        $registryKey = $null
         $registryKey = Test-WinChecksRegistryKey -Path $path -Name $name 
         
         if($null -eq $RegistryKey){
@@ -473,7 +467,6 @@ function Get-WinCheckDefenderStatus{ # Obtiens des informations sur l'état du W
         # Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Quarantine" -Name "DaysToRetainCleanedMalware" -Value 1
         $path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Quarantine"
         $name = "DaysToRetainCleanedMalware"
-        $registryKey = $null
         $registryKey = Test-WinChecksRegistryKey -Path $path -Name $name 
         
         if($null -eq $RegistryKey){
@@ -482,20 +475,6 @@ function Get-WinCheckDefenderStatus{ # Obtiens des informations sur l'état du W
             $checkMessage += "Valeur actuelle du $name : $(($registryKey).$name) " + "`n" 
             }
 
-        # AllowFullScanOnMappedNetworkDrives : Permet à Defender d'analyser les lecteurs réseau mappés pendant l'analyse complète
-        # Documentation : https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender
-        # Définir la valeur de AllowFullScanOnMappedNetworkDrives à 1 si elle n'est pas déjà définie
-        # Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Name "AllowFullScanOnMappedNetworkDrives" -Value 1
-        $path = "HKLM:\Software\Policies\Microsoft\Windows Defender\Scan"
-        $name = "AllowFullScanOnMappedNetworkDrives"
-        $registryKey = $null
-        $registryKey = Test-WinChecksRegistryKey -Path $path -Name $name 
-        
-        if($null -eq $RegistryKey){
-            $checkMessage += "$name n'est pas défini. " + "`n"
-        } else {
-            $checkMessage += "Valeur actuelle du $name : $(($registryKey).$name) " + "`n" 
-            }
 
         # CheckForSignaturesBeforeRunningScan : Vérifie les signatures avant de lancer une analyse
         # Documentation : https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender 
@@ -503,7 +482,6 @@ function Get-WinCheckDefenderStatus{ # Obtiens des informations sur l'état du W
         # Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Name "CheckForSignaturesBeforeRunningScan" -Value 1 
         $path = "HKLM:\Software\Policies\Microsoft\Windows Defender\Scan"
         $name = "CheckForSignaturesBeforeRunningScan"
-        $registryKey = $null
         $registryKey = Test-WinChecksRegistryKey -Path $path -Name $name 
         
         if($null -eq $RegistryKey){
@@ -520,10 +498,30 @@ function Get-WinCheckDefenderStatus{ # Obtiens des informations sur l'état du W
     return $checkMessage
 } # END functionn : Get-WinCheckDefenderStatus
 
-function Set-WinCheckDefenderConfig { # Configure 4 paramètres de sécurité sur Windows Defender (Antivirus).
-# La fonction Set-WinCheckDefenderConfig permet de configurer quatre paramètres de sécurité de Windows Defender.
-# Les paramètres sont d'abord vérifiés, puis définis le cas échéant, et toutes les actions sont enregistrées dans le fichier de log « WinChecksWindowsDefender ».
-
+function Set-WinCheckDefenderConfig { # Configure et sécuriser Windows Defender (l'antivirus de Microsoft)
+<#
+.DESCRIPTION
+	Set-WinCheckDefenderConfig. Configure et sécuriser Windows Defender (l'antivirus de Microsoft) en définissant plusieurs paramètres de sécurité.
+    Elle vérifie d'abord l'état actuel de Windows Defender, puis ajuste les paramètres de sécurité pour garantir que l'antivirus fonctionne correctement 
+    et que les configurations recommandées sont appliquées. Tout cela est enregistré dans un fichier de log afin de suivre les actions et leur statut.
+    1. Initialisation des paramètres et préparation du fichier de log 
+    2. Vérification de l'état de Windows Defender
+    3. Mise à jour des définitions de Windows Defender
+    4. Configuration des paramètres avancés de Windows Defender (modification du registre)
+    - - CloudExtendedTimeout : Ce paramètre détermine combien de temps Defender peut attendre pour une analyse de sécurité via le cloud. Le script le configure à 60 secondes. 
+    - - DaysToRetainCleanedMalware : Ce paramètre spécifie le nombre de jours pendant lesquels les éléments nettoyés par Defender doivent être conservés dans la quarantaine. Il est configuré à 1 jour.
+    - - CheckForSignaturesBeforeRunningScan : : Ce paramètre vérifie que les signatures de Defender sont à jour avant de lancer une analyse. Il est activé en définissant cette option sur 1.
+.OUTPUTS
+    Un fichier log est généré pour consigner les actions et résultats. 
+    $logPath = "C:\Temp\xLuna"              
+    $logName= 'WinChecksWindowsDefender-'+$date+'.log'
+.EXAMPLE
+    Set-WinCheckDefenderConfig
+.LINK
+	https://github.com/xEsther-IT/WinChecks
+.NOTES
+	Author: 2024 @xesther.meza | License: MIT
+#>
     $date = Get-Date -Format "yyyy-MM-dd"
     # Définir les entrées de la fonction Write-WinCheckLog afin de generer raport : WinChecksWindowsDefender-yyyy-MM-dd.log
     $logPath = "C:\Temp\xLuna"              # Répertoire où le fichier de log sera stocké
@@ -630,39 +628,14 @@ function Set-WinCheckDefenderConfig { # Configure 4 paramètres de sécurité su
             Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Error' -Message $logMessage
         } 
         # Définir la valeur de PurgeItemsAfterDelay à 1 (supprimer après 1 jour)
-        # Set-WinChecksRegistryKey -Path $path -Name $name -Value $value -ErrorAction SilentlyContinue
+        Set-WinChecksRegistryKey -Path $path -Name $name -Value $value -ErrorAction SilentlyContinue
         $logMessage = "`n" + "$name est défini sur 1 jour."
         Write-Host $logMessage -ForegroundColor Green
         Write-Host "DaysToRetainCleanedMalware : Supprime les éléments mis en quarantaine après un jour"
         Write-Host "Documentation : https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender"
         Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Info' -Message $logMessage
     
-        
-        # AllowFullScanOnMappedNetworkDrives : Permet à Microsoft Defender d'analyser les lecteurs réseau mappés pendant l'analyse complète.
-        # https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender 
-        # Activer l'analyse complète des lecteurs réseau mappés
-        # Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows Defender\Scan" -Name "AllowFullScanOnMappedNetworkDrives" -Value 1
-        $path = "HKLM:\Software\Policies\Microsoft\Windows Defender\Scan"
-        $name = "AllowFullScanOnMappedNetworkDrives"
-        $value = 1
-        
-        $actual = Test-WinChecksRegistryKey -Path $path -Name $name 
-        if($null -ne $actual){
-            $logMessage = "Valeur actuelle du $name : " +  $(($actual).$name) 
-            Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Info' -Message $logMessage
-        } else{
-            $logMessage = "Valeur de $name n'existe pas " 
-            Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Error' -Message $logMessage
-        } 
-        # Définir la valeur de DisableScanningMappedNetworkDrivesForFullScan à 1
-        # Set-WinChecksRegistryKey -Path $path -Name $name -Value $value -ErrorAction SilentlyContinue
-        $logMessage = "`n" + "$name est défini sur 1."
-        Write-Host $logMessage -ForegroundColor Green
-        Write-Host "AllowFullScanOnMappedNetworkDrives : Activer l'analyse complète des lecteurs réseau mappés "
-        Write-Host "Documentation : https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender"
-        Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Info' -Message $logMessage
-    
-        
+
         # CheckForSignaturesBeforeRunningScan : Vérifie les signatures avant de lancer une analyse
         # Documentation : https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender 
         # Définir la valeur de CheckForSignaturesBeforeRunningScan à 1 si elle n'est pas déjà définie
@@ -680,7 +653,7 @@ function Set-WinCheckDefenderConfig { # Configure 4 paramètres de sécurité su
             Write-WinCheckLog -LogPath $logPath -LogName $logName -Type 'Error' -Message $logMessage
         } 
         # Définir la valeur de CheckForSignaturesBeforeRunningScan à 1
-        # Set-WinChecksRegistryKey -Path $path -Name $name -Value $value -ErrorAction SilentlyContinue
+        Set-WinChecksRegistryKey -Path $path -Name $name -Value $value -ErrorAction SilentlyContinue
         $logMessage = "`n" + "$name est défini sur 1."
         Write-Host $logMessage -ForegroundColor Green
         Write-Host "CheckForSignaturesBeforeRunningScan : Vérifie les signatures avant de lancer une analyse"
@@ -1174,7 +1147,7 @@ function Get-WinCheckInstalledApplications { # Récupere les applications instal
 } # END function : Get-WinCheckInstalledApplications
 
 function Write-WinCheckLog { # Écrire des messages (chains de caracteres) dans un fichier spécifié.
-<#
+    <#
 .DESCRIPTION
 	Write-WinCheckLog. Écrire des messages (chains de caracteres) dans un fichier spécifié. Le script Write-WinCheckLog.ps1 permet d'écrire des messages dans un fichier spécifié tout en affichant les messages dans la console avec une coloration appropriée en fonction du type de message. 
     Ce script permet également de créer des rapports au format texte ou des fichiers de log.
