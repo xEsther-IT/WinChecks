@@ -15,23 +15,22 @@ Ce script est fourni tel quel et sans garantie. Vous l'utilisez à vos risques e
 
 # Installation du module 
 📫 Pour installer le module WinChecks, exécutez la commande suivante dans PowerShell :
-
     Install-Module -Name WinChecks
 
 # Importation du module
 📫 Une fois le module installé, utilisez la commande suivante pour l'importer :
-Import-Module .\WinChecks.psd1 -Force
+    Import-Module .\WinChecks.psd1 -Force
 
 # Lancer le menu principal 
 📫 En frances : 
-start-WinCheks
-start-WinCheks -laguage “fr”
+    start-WinCheks
+    start-WinCheks -laguage “fr”
 
 📫 En anglais: 
 start-WinCheks -laguage “en” 
 
 📫 En espanol: 
-start-WinCheks -laguage “es”
+    start-WinCheks -laguage “es”
 
 # Sortie attendue
 Le script générera un rapport détaillant l'état de la sécurité de votre système, y compris des informations sur Windows Defender, et l'enverra dans un fichier texte. Vous pourrez alors analyser ce fichier pour identifier toute vulnérabilité ou tout problème potentiel.
