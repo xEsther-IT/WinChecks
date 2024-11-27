@@ -56,16 +56,20 @@ Ce script PowerShell effectue des contrôles de sécurité sur un système Windo
     0. Quitter
     ========================
 # À venir : 
+
 👀 v1.0.7
 - Get-WinCheckWindowsUpdateStatus
 - Set-WinCheckWindowsUpdateConfig
 - Creation du fichier Log : L'execution de Set-WinCheckWindowsUpdateConfig genere le log : .\Set-WinCheckWindowsUpdateConfig-.log
 - Corriger l'erreur de calcul de l'espace libre des partitions. Actuellement, les informations sont dupliquées.
 - Corriger l'erreur de présentation des adresses IP.
+
 👀 v2.0.0
 Choisir une langue (français, espagnol ou anglais) et la maintenir dans tous les messages, logs et rapports. La gestion de trois langues est devenue très difficile.
+
 👀 v3.0.0
 - Set-WinCheckUsers : Limiter les accès. Restreindre les permissions et n'accorder l'accès aux systèmes qu'aux utilisateurs qui en ont besoin
+
 👀 v4.0.0
 - Get-WinCheckBackupStatus
 - Set-WinCheckBackupConfig : Vérification des sauvegardes : Il vérifiera la présence de sauvegardes et leur bon fonctionnement. Cela inclut la vérification de la configuration des sauvegardes automatiques et leur statut.
