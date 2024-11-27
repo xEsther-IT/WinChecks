@@ -15,9 +15,8 @@ Ce script est fourni tel quel et sans garantie. Vous l'utilisez à vos risques e
 
 # Installation du module 
 📫 Pour installer le module WinChecks, exécutez la commande suivante dans PowerShell :
-==
-Install-Module -Name WinChecks
-==
+
+    Install-Module -Name WinChecks
 
 # Importation du module
 📫 Une fois le module installé, utilisez la commande suivante pour l'importer :
