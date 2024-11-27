@@ -1,7 +1,7 @@
 # WinChecks
 WinChecks est un script PowerShell qui effectue des contrôles de sécurité sur un système d'exploitation Windows en vérifiant l'état de Windows Defender. Le script génère ensuite un rapport avec les résultats et l'envoie dans un fichier texte. Cet outil permet de vérifier rapidement le niveau de sécurité d'un système Windows et d'identifier tout problème potentiel à résoudre. Utilisation à vos propres risques et périls.
 
-Créé par @xesther.meza.
+⚡Créé par @xesther.meza⚡
 
 # Clause de non-responsabilité 
 Ce script est fourni tel quel et sans garantie. Vous l'utilisez à vos risques et périls. L'auteur décline toute responsabilité en cas de dommages ou de pertes causés par l'utilisation de ce script..
@@ -56,17 +56,17 @@ Ce script PowerShell effectue des contrôles de sécurité sur un système Windo
     0. Quitter
     ========================
 # À venir : 
-# v1.0.7
+👀 v1.0.7
 - Get-WinCheckWindowsUpdateStatus
 - Set-WinCheckWindowsUpdateConfig
 - Creation du fichier Log : L'execution de Set-WinCheckWindowsUpdateConfig genere le log : .\Set-WinCheckWindowsUpdateConfig-.log
 - Corriger l'erreur de calcul de l'espace libre des partitions. Actuellement, les informations sont dupliquées.
 - Corriger l'erreur de présentation des adresses IP.
-# v2.0.0
+👀 v2.0.0
 Choisir une langue (français, espagnol ou anglais) et la maintenir dans tous les messages, logs et rapports. La gestion de trois langues est devenue très difficile.
-# v3.0.0
+👀 v3.0.0
 - Set-WinCheckUsers : Limiter les accès. Restreindre les permissions et n'accorder l'accès aux systèmes qu'aux utilisateurs qui en ont besoin
-# v4.0.0
+👀 v4.0.0
 - Get-WinCheckBackupStatus
 - Set-WinCheckBackupConfig : Vérification des sauvegardes : Il vérifiera la présence de sauvegardes et leur bon fonctionnement. Cela inclut la vérification de la configuration des sauvegardes automatiques et leur statut.
 
